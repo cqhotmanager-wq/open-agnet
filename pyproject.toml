@@ -1,7 +1,7 @@
 [project]
-name = "agent-platform"
+name = "open-agent"
 version = "0.1.0"
-description = "FastAPI + LangChain based agent platform with Milvus, skills, and JWT auth"
+description = "FastAPI + LangChain based open-agent with Milvus, skills, and JWT auth"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -33,4 +33,7 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
 
