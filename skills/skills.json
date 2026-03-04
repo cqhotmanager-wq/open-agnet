@@ -1,0 +1,10 @@
+{
+  "skills": [
+    {
+      "name": "查询天气",
+      "description": "查询指定城市的当前天气情况",
+      "location": "./skills/weather/SKILL.md"
+    }
+  ]
+}
+

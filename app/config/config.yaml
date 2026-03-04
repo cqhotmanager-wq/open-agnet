@@ -1,0 +1,28 @@
+database:
+  type: mysql  # or postgresql
+  host: localhost
+  port: 3306
+  username: root
+  password: "123456"
+  dbname: agent_platform
+
+llm:
+  provider: openai
+  model: gpt-4
+  api_key: "YOUR_OPENAI_API_KEY"
+
+vector_store:
+  type: milvus
+  host: localhost
+  port: 19530
+  collection: chat_memory
+
+jwt:
+  secret: "your-secret"
+  expire_minutes: 120
+
+skill:
+  root_path: "./skills"
+  skill_json_path: "./skills/skills.json"
+  scan_interval_seconds: 60
+
