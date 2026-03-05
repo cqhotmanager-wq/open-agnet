@@ -1,15 +1,29 @@
+# 服务监听地址与端口（启动时由 python -m app 或 uvicorn 使用）
+server:
+  host: "0.0.0.0"
+  port: 8080
+
 database:
   type: mysql  # or postgresql
   host: localhost
   port: 3306
   username: root
-  password: "123456"
+  password: "root123"
   dbname: agent_platform
 
 llm:
-  provider: openai
-  model: gpt-4
-  api_key: "YOUR_OPENAI_API_KEY"
+  # provider: openai / deepseek / 其它 OpenAI 兼容服务标识（目前仅用于区分 base_url）
+  provider: deepseek
+  # openai 示例：gpt-4
+  # deepseek 示例：deepseek-chat
+  model: deepseek-chat
+  # 对应厂商的 API Key
+  api_key: "sk-13a955741d9e4dfbbc3c63913fbae6dd"
+  # OpenAI 官方可留空（使用默认），DeepSeek 等兼容服务示例：
+  base_url: "https://api.deepseek.com/v1"
+  # 采样温度与最大生成 token 数
+  temperature: 0.1
+  max_tokens:
 
 vector_store:
   type: milvus
@@ -18,7 +32,7 @@ vector_store:
   collection: chat_memory
 
 jwt:
-  secret: "your-secret"
+  secret: "mySecretKey123456789012345678901234567890123456789012345678901234567890"
   expire_minutes: 120
 
 skill:

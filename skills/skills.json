@@ -1,9 +1,9 @@
 {
   "skills": [
     {
-      "name": "查询天气",
-      "description": "查询指定城市的当前天气情况",
-      "location": "./skills/weather/SKILL.md"
+      "name": "创建SKILL",
+      "description": "该文档描述了如何通过智能体创建SKILL",
+      "location": "./skills/createSkill/SKILL.md"
     }
   ]
 }

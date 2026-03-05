@@ -1,10 +1,10 @@
 from typing import List, Tuple
 
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
-from langchain_openai import OpenAIEmbeddings
 from pymilvus import Collection, CollectionSchema, DataType, FieldSchema, connections, utility
 
 from app.core.config import load_config
+from langchain_openai_like import init_openai_like_embeddings
 
 
 config = load_config()
@@ -14,7 +14,8 @@ class MemoryService:
     def __init__(self) -> None:
         self._connect()
         self.collection = self._get_or_create_collection()
-        self.embeddings = OpenAIEmbeddings(openai_api_key=config.llm.api_key)
+        # Embedding 实例通过统一入口创建，支持 OpenAI / DeepSeek 等 OpenAI-like 服务
+        self.embeddings = init_openai_like_embeddings()
 
     def _connect(self) -> None:
         connections.connect(

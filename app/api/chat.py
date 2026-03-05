@@ -1,3 +1,5 @@
+# 对话 API：发送消息并获取 Agent 回复
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -18,6 +20,7 @@ def chat(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """发送一条消息，按 session_uuid 获取或创建会话，调用 Agent 并返回回复。"""
     session_service = SessionService(db)
     session = session_service.get_or_create_session(user, payload.session_uuid)
     agent_service = AgentService()
