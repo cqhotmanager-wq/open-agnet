@@ -66,7 +66,7 @@ class AgentService:
         human = HumanMessage(content=message)
         ai = AIMessage(content=response_text)
         self.memory_manager.add_chat_messages(db, session_uuid, [human, ai])
-        # 若需将本条视为重要记忆，可调用：self.memory_manager.add_important_memory(session_uuid, message, "chat")
+        # 若需将本条视为重要记忆，可调用：self.memory_manager.add_important_memory(user.id, session_uuid, message, "chat")
         llm = self._build_llm()
         self.memory_manager.update_summary_if_needed(db, session_uuid, llm=llm)
         return response_text

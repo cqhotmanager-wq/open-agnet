@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 
 from app.models.session import Session as ChatSession
 from app.models.user import User
@@ -23,6 +24,15 @@ class SessionService:
         self.db.commit()
         self.db.refresh(new_session)
         return new_session
+
+    def list_sessions_by_user(self, user: User):
+        """通过 user_id 查询该用户所有会话，按创建时间倒序。"""
+        return (
+            self.db.query(ChatSession)
+            .filter(ChatSession.user_id == user.id)
+            .order_by(desc(ChatSession.created_at))
+            .all()
+        )
 
     def deactivate_session(self, user: User, session_uuid: str) -> None:
         session = (

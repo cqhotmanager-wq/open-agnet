@@ -20,7 +20,11 @@ def chat(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """发送一条消息，按 session_uuid 获取或创建会话，调用 Agent 并返回回复。"""
+    """
+    发送一条消息。每个会话周期内 session_uuid 唯一且整轮对话一致。
+    - 未传 session_uuid 或传空：创建新会话周期，返回新 session_uuid，后续请求请携带该 id 以保持同一上下文。
+    - 传 session_uuid：复用该会话（须属于当前用户），在同一上下文中继续对话。
+    """
     session_service = SessionService(db)
     session = session_service.get_or_create_session(user, payload.session_uuid)
     agent_service = AgentService()
