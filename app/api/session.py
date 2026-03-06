@@ -1,5 +1,7 @@
-# 会话相关 API：创建会话、按 user_id 查所有会话、清空会话记忆
-
+"""
+会话 API：创建会话、按当前用户查询其所有会话列表、清空指定会话的记忆（SQL + Milvus）。
+所有接口需登录；通过 user_id（从 JWT 解析）限定仅操作当前用户数据。
+"""
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException

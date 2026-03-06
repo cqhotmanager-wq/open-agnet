@@ -1,5 +1,7 @@
-# 技能列表 API（需登录）
-
+"""
+技能 API：获取当前配置的可用技能列表（来自 skills/skills.json 及 SKILL.md）。
+需登录。
+"""
 from fastapi import APIRouter, Depends
 
 from app.core.auth import get_current_user

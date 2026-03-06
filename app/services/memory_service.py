@@ -1,3 +1,7 @@
+"""
+记忆服务（Legacy）：维护 Milvus 集合 chat_memory，提供 embedding 与向量写入/检索。
+当前主流程使用 MemoryManager + agent_memory；本服务主要被 MemoryManager 复用其 embedding 能力与连接配置。
+"""
 from typing import List, Tuple
 
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
@@ -11,6 +15,8 @@ config = load_config()
 
 
 class MemoryService:
+    """Milvus 连接、chat_memory 集合维护、embedding 计算；供 MemoryManager 复用 embedding。"""
+
     def __init__(self) -> None:
         self._connect()
         self.collection = self._get_or_create_collection()

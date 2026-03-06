@@ -1,5 +1,7 @@
-# 对话 API：发送消息并获取 Agent 回复
-
+"""
+对话 API：发送用户消息，由 Agent 结合上下文（最近历史、摘要、向量检索）调用 LLM 与工具后返回回复。
+需登录；会话周期由 session_uuid 标识，不传则创建新会话。
+"""
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 

@@ -1,3 +1,6 @@
+"""
+技能服务：从 skills.json 加载技能列表，解析 location 读取 SKILL.md 内容，拼成系统提示片段供 Agent 使用。
+"""
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -10,6 +13,8 @@ config = load_config()
 
 
 class SkillService:
+    """技能配置与 SKILL.md 内容加载，用于构建系统提示中的「可用技能」描述。"""
+
     def __init__(self) -> None:
         self.root = Path(config.skill.root_path).resolve()
         self.skill_json = Path(config.skill.skill_json_path).resolve()

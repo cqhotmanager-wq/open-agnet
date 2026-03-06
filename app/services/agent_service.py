@@ -1,3 +1,7 @@
+"""
+Agent 服务：组装上下文（ContextBuilder）→ 构建消息（PromptBuilder）→ 调用 LangChain Agent（LLM+工具）→ 写入记忆并更新摘要。
+单轮对话入口为 chat()，内部完成「读 SQL/Milvus → 拼 prompt → 调用图 → 存 SQL、可选 Milvus、更新 summary」。
+"""
 from langchain.agents import create_agent
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
@@ -16,6 +20,8 @@ config = load_config()
 
 
 class AgentService:
+    """对话流水线：上下文构建 → 消息构建 → Agent 调用 → 记忆与摘要持久化。"""
+
     def __init__(self) -> None:
         self.memory_manager = MemoryManager()
         self.context_builder = ContextBuilder()

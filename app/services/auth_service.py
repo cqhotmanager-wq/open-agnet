@@ -1,5 +1,6 @@
-# 认证服务：用户相关数据库操作（查询、创建）
-
+"""
+认证服务：封装用户表（users）的查询与创建，供注册、登录、JWT 解析后查用户使用。
+"""
 from sqlalchemy.orm import Session
 
 from app.models.user import User

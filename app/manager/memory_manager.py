@@ -1,6 +1,8 @@
-# 统一记忆管理：SQL 存完整聊天与摘要，Milvus 存长期向量记忆
-# 通过 user_id + session_uuid 在向量库中定位本次会话；通过 user_id 可查用户全部会话
-
+"""
+统一记忆管理：SQL 存完整聊天与摘要，Milvus agent_memory 存长期向量记忆。
+通过 user_id + session_uuid 在向量库中定位本次会话；通过 user_id 可查用户全部会话。
+提供：最近历史（SQL）、摘要（SQL）、向量检索（Milvus）、写入聊天/重要记忆、摘要更新（LLM）。
+"""
 import time
 from typing import List, Literal, Optional
 

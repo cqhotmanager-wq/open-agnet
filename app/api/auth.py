@@ -1,5 +1,7 @@
-# 认证相关 API：注册、登录（均无需 token，公开接口）
-
+"""
+认证模块 API：用户注册、用户登录。
+所有接口均为公开，无需携带 JWT；登录成功返回 access_token，后续请求需在 Header 中携带。
+"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 

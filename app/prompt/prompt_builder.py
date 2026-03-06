@@ -1,5 +1,7 @@
-# Prompt Template Layer：将 context_data 格式化为发给 LLM 的 message 列表
-
+"""
+Prompt 模板层：将 ContextData 格式化为发给 LLM 的 message 列表。
+顺序为：System → User profile → Conversation summary → Recent history → Retrieved memory → Current question。
+"""
 from typing import List
 
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
