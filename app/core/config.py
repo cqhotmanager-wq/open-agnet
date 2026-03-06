@@ -51,6 +51,8 @@ class VectorStoreConfig(BaseModel):
     host: str = "localhost"
     port: int = 19530
     collection: str = "chat_memory"
+    # 长期记忆集合（重要记忆、可检索语义）
+    agent_memory_collection: str = "agent_memory"
 
 
 class EmbeddingConfig(BaseModel):

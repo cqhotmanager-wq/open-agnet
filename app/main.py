@@ -5,6 +5,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.api import auth, chat, session, skill
 from app.core.db import Base, engine
+from app.models.chat_message import ChatMessage  # noqa: F401 — register for create_all
+from app.models.conversation_summary import ConversationSummary  # noqa: F401
 from app.core.exceptions import (
     AppException,
     app_exception_handler,

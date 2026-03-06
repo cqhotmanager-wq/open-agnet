@@ -24,6 +24,11 @@ def chat(
     session_service = SessionService(db)
     session = session_service.get_or_create_session(user, payload.session_uuid)
     agent_service = AgentService()
-    answer = agent_service.chat(user=user, session_uuid=session.session_uuid, message=payload.message)
+    answer = agent_service.chat(
+        user=user,
+        session_uuid=session.session_uuid,
+        message=payload.message,
+        db=db,
+    )
     return ChatResponse(session_uuid=session.session_uuid, answer=answer)
 

@@ -1,13 +1,14 @@
 # 会话相关 API：创建会话、清空会话记忆
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user
 from app.core.db import get_db
+from app.models.session import Session as ChatSession
 from app.models.user import User
-from app.services.memory_service import MemoryService
+from app.services.memory_manager import MemoryManager
 from app.services.session_service import SessionService
 
 
@@ -36,9 +37,15 @@ def clear_session_memory(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """清空指定会话的记忆（向量库等），仅限当前用户。"""
-    _ = db  # 预留，便于后续扩展
-    memory = MemoryService()
-    memory.clear_session(user_id=user.id, session_uuid=session_uuid)
+    """清空指定会话的记忆（SQL 聊天/摘要 + Milvus 向量），仅限当前用户。"""
+    session = (
+        db.query(ChatSession)
+        .filter(ChatSession.user_id == user.id, ChatSession.session_uuid == session_uuid)
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    memory = MemoryManager()
+    memory.clear_session(db, session_uuid)
     return {"status": "ok"}
 

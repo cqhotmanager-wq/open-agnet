@@ -34,3 +34,24 @@ CREATE TABLE IF NOT EXISTS sessions (
   CONSTRAINT fk_sessions_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   COMMENT '用户会话表';
+
+-- 聊天记录表（按 session_uuid，用于 recent history 与 summary）
+CREATE TABLE IF NOT EXISTS chat_message (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  session_uuid VARCHAR(64) NOT NULL,
+  role VARCHAR(32) NOT NULL,
+  content TEXT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY ix_session_uuid (session_uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT '聊天记录';
+
+-- 会话摘要表（按 session_uuid，避免上下文过长）
+CREATE TABLE IF NOT EXISTS conversation_summary (
+  session_uuid VARCHAR(64) NOT NULL,
+  summary TEXT NOT NULL DEFAULT '',
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (session_uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT '会话摘要';

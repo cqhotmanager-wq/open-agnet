@@ -1,12 +1,13 @@
 from langchain.agents import create_agent
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
+from sqlalchemy.orm import Session
 
 from app.core.callbacks import ConsoleLLMCallback
 from app.core.config import load_config
 from app.models.user import User
 from app.services.context_builder import ContextBuilder
-from app.services.memory_service import MemoryService
+from app.services.memory_manager import MemoryManager
 from app.services.prompt_builder import build_messages
 from app.tools import get_all_tools
 
@@ -16,7 +17,7 @@ config = load_config()
 
 class AgentService:
     def __init__(self) -> None:
-        self.memory_service = MemoryService()
+        self.memory_manager = MemoryManager()
         self.context_builder = ContextBuilder()
 
     def _build_llm(self) -> ChatOpenAI:
@@ -39,12 +40,13 @@ class AgentService:
         )
         return graph
 
-    def chat(self, user: User, session_uuid: str, message: str) -> str:
-        # Pipeline: User Input → Build Context Data → Build Prompt Messages → Call LLM → Save
+    def chat(self, user: User, session_uuid: str, message: str, db: Session) -> str:
+        # Pipeline: Build Context (SQL + Milvus) → Build Messages → LLM → 存 SQL，必要时存 Milvus、更新 Summary
         context_data = self.context_builder.build_context(
             user=user,
             session_uuid=session_uuid,
             user_question=message,
+            db=db,
         )
         messages = build_messages(context_data)
         graph = self.build_agent()
@@ -52,7 +54,6 @@ class AgentService:
             {"messages": messages},
             config={"callbacks": [ConsoleLLMCallback()]},
         )
-        # 取最后一条 AI 消息作为回复
         result_messages = result.get("messages", [])
         last_ai = None
         for m in reversed(result_messages):
@@ -61,12 +62,12 @@ class AgentService:
                 break
         response_text = last_ai.content if last_ai and last_ai.content else str(result)
 
+        # 写入流程：1. 存 SQL chat_message  2. 重要可在此存 Milvus  3. 更新 summary（若 >10 条）
         human = HumanMessage(content=message)
         ai = AIMessage(content=response_text)
-        self.memory_service.add_messages(
-            user_id=user.id,
-            session_uuid=session_uuid,
-            messages=[human, ai],
-        )
+        self.memory_manager.add_chat_messages(db, session_uuid, [human, ai])
+        # 若需将本条视为重要记忆，可调用：self.memory_manager.add_important_memory(session_uuid, message, "chat")
+        llm = self._build_llm()
+        self.memory_manager.update_summary_if_needed(db, session_uuid, llm=llm)
         return response_text
 
