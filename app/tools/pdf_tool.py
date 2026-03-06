@@ -8,13 +8,18 @@ from pydantic import BaseModel, Field
 from pypdf import PdfReader
 
 from app.core.config import load_config
+from app.core.skill_path import normalize_relative_to_skill_root
 
 config = load_config()
 _BASE_PATH = Path(config.skill.root_path).resolve()
 
 
 def _resolve_safe(path_str: str) -> Path:
-    p = (Path(path_str) if Path(path_str).is_absolute() else _BASE_PATH / path_str).resolve()
+    if Path(path_str).is_absolute():
+        p = Path(path_str).resolve()
+    else:
+        rel = normalize_relative_to_skill_root(path_str)
+        p = (_BASE_PATH / rel).resolve()
     try:
         p.relative_to(_BASE_PATH)
     except ValueError:

@@ -13,23 +13,35 @@ database:
 
 llm:
   # provider: openai / deepseek / 其它 OpenAI 兼容服务标识（目前仅用于区分 base_url）
-  provider: deepseek
+  provider: openai
   # openai 示例：gpt-4
   # deepseek 示例：deepseek-chat
-  model: deepseek-chat
+  model: gpt-5.1
   # 对应厂商的 API Key
-  api_key: "sk-13a955741d9e4dfbbc3c63913fbae6dd"
+  api_key: "sk-ahHS70nIhT5Gj08zBbP1aHTAaf2qal5zII2DfOe9UHnKdSQQ"
   # OpenAI 官方可留空（使用默认），DeepSeek 等兼容服务示例：
-  base_url: "https://api.deepseek.com/v1"
+  base_url: "https://api.openai-proxy.org/v1"
   # 采样温度与最大生成 token 数
   temperature: 0.1
-  max_tokens:
+  max_tokens: 99999
 
 vector_store:
   type: milvus
   host: localhost
   port: 19530
   collection: chat_memory
+
+embedding:
+  # provider: openai / deepseek / 其它 OpenAI 兼容服务标识
+  provider: openai
+  # DeepSeek 示例模型名称
+  model: text-embedding-3-large
+  # 对应 embedding 服务的 API Key（可与 llm.api_key 相同）
+  api_key: "sk-ahHS70nIhT5Gj08zBbP1aHTAaf2qal5zII2DfOe9UHnKdSQQ"
+  # DeepSeek 等兼容服务的 base_url
+  base_url: "https://api.openai-proxy.org/v1/"
+  # 向量维度（DeepSeek 为 1024）
+  dimensions: 1024
 
 jwt:
   secret: "mySecretKey123456789012345678901234567890123456789012345678901234567890"

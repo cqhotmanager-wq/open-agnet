@@ -53,6 +53,20 @@ class VectorStoreConfig(BaseModel):
     collection: str = "chat_memory"
 
 
+class EmbeddingConfig(BaseModel):
+    """向量模型配置（如 OpenAI / DeepSeek Embeddings）。"""
+    # provider: openai / deepseek / 其它 OpenAI 兼容服务标识
+    provider: str = "openai"
+    # 具体 embedding 模型名称，例如 deepseek-embedding-v1
+    model: str = "text-embedding-3-large"
+    # 对应厂商的 API Key
+    api_key: str
+    # 兼容服务的 base_url，例如 https://api.deepseek.com/v1
+    base_url: str | None = None
+    # 向量维度，例如 DeepSeek 为 1024，OpenAI text-embedding-3-large 为 3072
+    dimensions: int = 1024
+
+
 class JWTConfig(BaseModel):
     """JWT 签发与校验配置。"""
     secret: str
@@ -82,6 +96,7 @@ class AppConfig(BaseModel):
     database: DatabaseConfig
     llm: LLMConfig
     vector_store: VectorStoreConfig
+    embedding: EmbeddingConfig
     jwt: JWTConfig
     skill: SkillConfig
 

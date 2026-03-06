@@ -3,7 +3,7 @@
     {
       "name": "创建SKILL",
       "description": "该文档描述了如何通过智能体创建SKILL",
-      "location": "./skills/createSkill/SKILL.md"
+      "location": "./skills/createSkills/SKILL.md"
     }
   ]
 }

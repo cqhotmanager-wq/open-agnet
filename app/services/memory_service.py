@@ -1,10 +1,10 @@
 from typing import List, Tuple
 
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
+from langchain_openai import OpenAIEmbeddings
 from pymilvus import Collection, CollectionSchema, DataType, FieldSchema, connections, utility
 
 from app.core.config import load_config
-from langchain_openai_like import init_openai_like_embeddings
 
 
 config = load_config()
@@ -14,8 +14,13 @@ class MemoryService:
     def __init__(self) -> None:
         self._connect()
         self.collection = self._get_or_create_collection()
-        # Embedding 实例通过统一入口创建，支持 OpenAI / DeepSeek 等 OpenAI-like 服务
-        self.embeddings = init_openai_like_embeddings()
+        # Embedding：使用 OpenAIEmbeddings，支持 DeepSeek 等 OpenAI 兼容服务
+        self.embeddings = OpenAIEmbeddings(
+            model=config.embedding.model,
+            api_key=config.embedding.api_key,
+            base_url=config.embedding.base_url,
+            dimensions=config.embedding.dimensions,
+        )
 
     def _connect(self) -> None:
         connections.connect(
@@ -24,27 +29,41 @@ class MemoryService:
 
     def _get_or_create_collection(self) -> Collection:
         collection_name = config.vector_store.collection
-        if not utility.has_collection(collection_name):
-            fields = [
-                FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
-                FieldSchema(name="user_id", dtype=DataType.INT64),
-                FieldSchema(name="session_uuid", dtype=DataType.VARCHAR, max_length=64),
-                FieldSchema(name="role", dtype=DataType.VARCHAR, max_length=16),
-                FieldSchema(name="content", dtype=DataType.VARCHAR, max_length=2048),
-                FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1536),
-            ]
-            schema = CollectionSchema(fields=fields, description="Chat memory")
-            collection = Collection(name=collection_name, schema=schema)
-            collection.create_index(
-                field_name="embedding",
-                index_params={
-                    "metric_type": "IP",
-                    "index_type": "IVF_FLAT",
-                    "params": {"nlist": 1024},
-                },
-            )
-        else:
-            collection = Collection(collection_name)
+        expected_dim = config.embedding.dimensions
+
+        if utility.has_collection(collection_name):
+            coll = Collection(collection_name)
+            coll.load()
+            reuse = True
+            for f in coll.schema.fields:
+                if f.name == "embedding" and f.dtype == DataType.FLOAT_VECTOR:
+                    if f.params.get("dim") != expected_dim:
+                        coll.release()
+                        utility.drop_collection(collection_name)
+                        reuse = False
+                    break
+            if reuse:
+                return coll
+
+        # 不存在或维度不一致已 drop：按 config.embedding.dimensions 创建
+        fields = [
+            FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
+            FieldSchema(name="user_id", dtype=DataType.INT64),
+            FieldSchema(name="session_uuid", dtype=DataType.VARCHAR, max_length=64),
+            FieldSchema(name="role", dtype=DataType.VARCHAR, max_length=16),
+            FieldSchema(name="content", dtype=DataType.VARCHAR, max_length=2048),
+            FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=expected_dim),
+        ]
+        schema = CollectionSchema(fields=fields, description="Chat memory")
+        collection = Collection(name=collection_name, schema=schema)
+        collection.create_index(
+            field_name="embedding",
+            index_params={
+                "metric_type": "IP",
+                "index_type": "IVF_FLAT",
+                "params": {"nlist": 1024},
+            },
+        )
         collection.load()
         return collection
 
@@ -61,6 +80,7 @@ class MemoryService:
         contents: List[str] = []
         embeddings: List[List[float]] = []
 
+        expected_dim = config.embedding.dimensions
         for msg in messages:
             if isinstance(msg, HumanMessage):
                 role = "human"
@@ -70,7 +90,13 @@ class MemoryService:
                 role = "other"
             roles.append(role)
             contents.append(msg.content)
-            embeddings.append(self._embed(msg.content))
+            vec = self._embed(msg.content)
+            if len(vec) != expected_dim:
+                raise ValueError(
+                    f"Embedding 维度与配置不一致：模型返回 {len(vec)} 维，config.embedding.dimensions={expected_dim}。"
+                    "请将 config.yaml 中 embedding.dimensions 改为与模型输出一致（如 2048），并重启服务以重建 Milvus collection。"
+                )
+            embeddings.append(vec)
 
         data = [
             [user_id] * len(messages),
@@ -80,12 +106,8 @@ class MemoryService:
             embeddings,
         ]
 
-        self.collection.insert(
-            data,
-            insert_param={
-                "fields": ["user_id", "session_uuid", "role", "content", "embedding"]
-            },
-        )
+        # 插入时不要传 insert_param（pymilvus 会根据 schema 自动对齐）；data 顺序与 schema 字段顺序一致（不含 auto_id 的 id）
+        self.collection.insert(data)
 
     def query_history(
         self,
