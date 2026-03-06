@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 from app.core.callbacks import ConsoleLLMCallback
 from app.core.config import load_config
 from app.models.user import User
-from app.services.context_builder import ContextBuilder
-from app.services.memory_manager import MemoryManager
-from app.services.prompt_builder import build_messages
+from app.context.context_builder import ContextBuilder
+from app.manager.memory_manager import MemoryManager
+from app.prompt.prompt_builder import build_messages
 from app.tools import get_all_tools
 
 

@@ -4,7 +4,7 @@ from typing import List
 
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 
-from app.services.context_builder import ContextData
+from app.context.context_builder import ContextData
 
 
 def build_messages(context_data: ContextData) -> List[BaseMessage]:

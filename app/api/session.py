@@ -10,7 +10,7 @@ from app.core.auth import get_current_user
 from app.core.db import get_db
 from app.models.session import Session as ChatSession
 from app.models.user import User
-from app.services.memory_manager import MemoryManager
+from app.manager.memory_manager import MemoryManager
 from app.services.session_service import SessionService
 
 
